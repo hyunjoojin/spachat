@@ -12,6 +12,7 @@
 /*전역 $, spa */
 
 spa.shell = (function () {
+	'use strict';
 	//---------------- 모듈 스코프 변수 시작 --------------
 	var
 		configMap = {
@@ -21,9 +22,11 @@ spa.shell = (function () {
     	    resize_interval : 200,
     		main_html : String()
     			+ '<div class="spa-shell-head">'
-    				+ '<div class="spa-shell-head-logo"></div>'
-    				+ '<div class="spa-shell-head-acct"></div>'
-    				+ '<div class="spa-shell-head-search"></div>'
+    				+ '<div class="spa-shell-head-logo">'
+            			+ '<h1>SPA</h1>'
+            			+ '<p>javascript end to end</p>'
+					+ '</div>'
+        			+ '<div class="spa-shell-head-acct"></div>'
     			+ '</div>'
     			+ '<div class="spa-shell-main">'
 				    + '<div class="spa-shell-main-nav"></div>'
@@ -39,8 +42,9 @@ spa.shell = (function () {
 		},
 		jqueryMap = {},
 
-		copyAnchorMap, setJqueryMap, 
-		changeAnchorPart, onHashchange, onResize,
+		copyAnchorMap, setJqueryMap, changeAnchorPart, 
+		onResize, onHashchange, 
+    	onTapAcct, onLogin, onLogout,
 		setChatAnchor, initModule;
 	//----------------- 모듈 스코프 변수 끝---------------
 	
@@ -55,7 +59,12 @@ spa.shell = (function () {
 	// DOM 메서드 /setJqueryMap/ 시작
 	setJqueryMap = function () {
 		var $container = stateMap.$container;
-		jqueryMap = { $container : $container };
+
+		jqueryMap = { 
+			$container : $container,
+			$acct : $container.find('.spa-shell-head-acct'),
+			$nav : $container.find('.spa-shell-main-nav')
+		};
 	};
 	// DOM 메서드 /setJqueryMap/ 끝
 
@@ -206,6 +215,27 @@ spa.shell = (function () {
     	return true;
 	};
 	// 이벤트 핸들러 /onResize/ 끝
+
+	onTapAcct = function ( event ) {
+    	var acct_text, user_name, user = spa.model.people.get_user();
+    	if ( user.get_is_anon() ) {
+        	user_name = prompt( 'Please sign-in' );
+        	spa.model.people.login( user_name );
+        	jqueryMap.$acct.text( '... processing ...' );
+		}
+		else {
+        	spa.model.people.logout();
+        }
+    	return false;
+	};
+
+	onLogin = function ( event, login_user ) {
+    	jqueryMap.$acct.text( login_user.name );
+	};
+
+	onLogout = function ( event, logout_user ) {
+    	jqueryMap.$acct.text( 'Please sign-in' );
+	};
 	//-------------------- 이벤트 핸들러 끝 --------------------
 
 	//---------------------- 콜백 시작---------------------
@@ -274,6 +304,13 @@ spa.shell = (function () {
 			.bind( 'hashchange', onHashchange )
 			.bind( 'resize', onResize )
 			.trigger( 'hashchange' );
+
+		$.gevent.subscribe( $container, 'spa-login', onLogin ); 
+		$.gevent.subscribe( $container, 'spa-logout', onLogout );
+
+		jqueryMap.$acct
+    		.text( 'Please sign-in')
+    		.bind( 'utap', onTapAcct );
 	};
 	// public 메서드 /initModule/ 끝
 

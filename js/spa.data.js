@@ -1,6 +1,6 @@
 /*
- * spa.js
- * 루트 네임스페이스 모듈 
+ * spa.data.js 
+ * 데이터 모듈
  */
 
 /*jslint           browser : true,   continue : true,
@@ -11,12 +11,4 @@
 */
 /*global $, spa */
 
-var spa = (function () {
-	'use strict';
-	var initModule = function ( $container ) {
-		spa.model.initModule();
-		spa.shell.initModule( $container );
-	};
-	
-	return { initModule: initModule }; 
-}());
+spa.data = (function () { return {}; }());
